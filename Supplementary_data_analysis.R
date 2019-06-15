@@ -1,15 +1,16 @@
 ########################################################################################
 ### Supplementary code for the statistical analysis presented in section 3.1 and 3.2 ###
+##                           A github page with data is available at:                 ##
+##            https://github.com/Fabbiologia/supplementary_code_Favorettoetal2019     ##
 ##       Please contact favoretto.fabio@gmail.com for any problems running the code   ##
 ########################################################################################
-
 
 
 
 # Loading needed libraries ------------------------------------------------
 
 # if not previously installed you can uncomment the following to install and then load the needed
-# packages 
+# packages
 
 # install.packages(c("tidyverse", "janitor", "ggthemes", "broom", "raster", "mapview"))
 
@@ -20,22 +21,38 @@ library(ggthemes)
 library(broom)
 library(raster)
 library(mapview)
-
+library(htt)
 
 ## Loading data
 sampling_points <- shapefile("shp/Sampling.shp")
 mapview(sampling_points)
 
-read.csv(url("https://www.dropbox.com/s/z8n8x250ew7rt8s/data_table.csv?dl=0"))
+read.csv(url(
+        "https://www.dropbox.com/s/z8n8x250ew7rt8s/data_table.csv?dl=0"
+))
 
 # 01- Loading datasets ----------------------------------------------------
+df <-read.csv('https://raw.githubusercontent.com/Fabbiologia/supplementary_code_Favorettoetal2019/master/data/data_table.csv')
 
+# check the dataset
+head(df)
 
-df <- read.csv("data/data_table.csv")
+# The transect column represent the transect # T1, T2, T3 in each sampling point
+# the sampling point is represented by the id
+# x, y are point coordinates
+# scene is the name of the Landsat 8 scene
+# for substrate class and type see section 3.2
+# rao_div is the rao index value extracted from the scenes on the sampling point
+# then taxa and substrate follows
+# ttot is the number of total points registered in the transect
+# Hdiv is the shannon diversity calculated
+
 
 last_scenes <- df %>% group_by(scene, id, x, y, rao_div) %>% 
         summarise(Hmean=mean(Hdiv)) 
 
+m1 <- lm(log(last_scenes$Hmean) ~ log(last_scenes$rao_div))
+plot(m1)
 summary(lm(last_scenes$Hmean ~ last_scenes$rao_div))
 
 cor(last_scenes[c(5,6)])
@@ -48,7 +65,7 @@ cor(last_scenes[c(5,6)])
                 theme(text=element_text(size=25), panel.border = element_rect(fill=NA, colour="black"), legend.position = ""))
 
 
-ggsave("correlation.jpeg", plot = p,dpi = 300)
+
 
 
 xy <- read.csv("data/data_table.csv")
